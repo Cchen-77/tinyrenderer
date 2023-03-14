@@ -18,11 +18,6 @@ template <class t> struct Vec2 {
 	inline Vec2<t> operator *(float f)          const { return Vec2<t>(u*f, v*f); }
 	template <class > friend std::ostream& operator<<(std::ostream& s, Vec2<t>& v);
 };
-template<class t> 
-void swap(Vec2<t>& v0,Vec2<t>& v1){
-    std::swap(v0.x,v1.x);
-    std::swap(v0.y,v1.y);
-}
 template <class t> struct Vec3 {
 	union {
 		struct {t x, y, z;};
@@ -40,12 +35,7 @@ template <class t> struct Vec3 {
 	Vec3<t> & normalize(t l=1) { *this = (*this)*(l/norm()); return *this; }
 	template <class > friend std::ostream& operator<<(std::ostream& s, Vec3<t>& v);
 };
-template<class t> 
-void swap(Vec3<t>& v0,Vec3<t>& v1){
-    std::swap(v0.x,v1.x);
-    std::swap(v0.y,v1.y);
-    std::swap(v0.z,v1.z);
-}
+
 typedef Vec2<float> Vec2f;
 typedef Vec2<int>   Vec2i;
 typedef Vec3<float> Vec3f;

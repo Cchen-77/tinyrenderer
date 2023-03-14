@@ -6,7 +6,6 @@ const TGAColor green = TGAColor(0,255,0,255);
 Model *model = NULL;
 const int width  = 800;
 const int height = 800;
-int Lmin[height+1],Rmax[height+1];
 void line(Vec2i v0,Vec2i v1,TGAImage& image,const TGAColor& color){
 	bool steep = false;
 	int x0 = v0.x,y0 = v0.y;
@@ -28,13 +27,9 @@ void line(Vec2i v0,Vec2i v1,TGAImage& image,const TGAColor& color){
 	for(int x = x0;x<=x1;++x){
 		if(!steep){
 			image.set(x,y,color);
-			Rmax[y] = std::max(Rmax[y],x);
-			Lmin[y] = std::min(Lmin[y],x);
 		}
 		else{
 			image.set(y,x,color);
-			Rmax[x] = std::max(Rmax[x],y);
-			Lmin[x] = std::min(Lmin[x],y);
 		}
 		error2 += derror2;
 		if(error2>dx){
@@ -45,24 +40,22 @@ void line(Vec2i v0,Vec2i v1,TGAImage& image,const TGAColor& color){
 	}
 }
 void triangle(Vec2i t0,Vec2i t1,Vec2i t2,TGAImage& image,const TGAColor& color){
-	Vec2i t[3] = {t0,t1,t2};
-	for(int i=2;i>=0;--i){
-		for(int j=0;j<i;++j){
-			if(t[j].y>t[j+1].y){
-				swap(t[j],t[j+1]);
-			}
-		}
-	}
-	for(int h=t[0].y;h<=t[2].y;++h){
-		Rmax[h] = 0;
-		Lmin[h] = width;
-	}
-	line(t[0],t[1],image,color);
-	line(t[0],t[2],image,color);
-	line(t[1],t[2],image,color);
-	for(int h=t[0].y;h<=t[2].y;++h){
-		for(int i = Lmin[h];i<=Rmax[h];++i){
-			image.set(i,h,color);
+	if(t0.y == t1.y&&t1.y==t2.y) return;
+	if(t0.y>t1.y) std::swap(t0,t1);
+	if(t1.y>t2.y) std::swap(t1,t2);
+	if(t0.y>t1.y) std::swap(t0,t1);
+	int total_height = t2.y - t0.y;
+	for(int i=0;i<total_height;++i){
+		bool second_half = (i>t1.y-t0.y) || (t1.y == t0.y);
+		int segment_height = second_half ? t2.y-t1.y:t1.y-t0.y;
+		float alpha = float(i)/total_height;
+		float beta = (float(i) - (second_half? (t1.y-t0.y):0))/segment_height;
+		Vec2i A = t0 + (t2-t0)*alpha;
+		Vec2i B = second_half?(t1+(t2-t1)*beta):(t0+(t1-t0)*beta);
+		if(A.x>B.x) std::swap(A,B);
+		for(int j=A.x;j<=B.x;++j)
+		{
+			image.set(j,t0.y+i,color);
 		}
 	}
 
